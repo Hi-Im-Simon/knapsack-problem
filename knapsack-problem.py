@@ -1,25 +1,50 @@
-def knapsack(rows, wei, val):
-    cols = len(val)
-    tab = [[0 for _ in range(rows + 1)] for _ in range(cols + 1)]
+class Knapsack:
+    def __init__(self, cols, wei, val):
+        self.cols = cols
+        self.wei = wei
+        self.val = val
+        self.rows = len(val)
+        self.tab = [[0 for _ in range(cols + 1)] for _ in range(self.rows + 1)]
 
-    for row in range(cols + 1):
-        for col in range(rows + 1):
-            if row == 0 or col == 0:
-                tab[row][col] = 0
-            elif wei[row-1] <= col:
-                tab[row][col] = max(val[row-1] + tab[row-1][col-wei[row-1]], tab[row-1][col])
+        for row in range(self.rows + 1):
+            for col in range(cols + 1):
+                if row == 0 or col == 0:
+                    self.tab[row][col] = 0
+                elif wei[row-1] <= col:
+                    self.tab[row][col] = max(val[row-1] + self.tab[row-1][col-wei[row-1]], self.tab[row-1][col])
+                else:
+                    self.tab[row][col] = self.tab[row-1][col]
+
+    
+    def findMaxValue(self, bag_size):
+        if bag_size <= self.cols:
+            return self.tab[self.rows][bag_size]
+        return 'Knapsack size too large'
+
+
+    def findElements(self, bag_size):
+        if bag_size <= self.cols:
+            return self.findNext(bag_size, self.rows, [])
+        return 'Knapsack size too large'
+
+
+    def findNext(self, x, y, elems):
+        if y > 0 and x > 0:
+            if self.tab[y][x] == self.tab[y-1][x]:
+                self.findNext(x, y-1, elems)
             else:
-                tab[row][col] = tab[row-1][col]
-    return tab[cols][rows]
+                elems.append(self.val[y-1])
+                self.findNext(x-self.wei[y-1], y-1, elems)
+        return elems
 
 
-# generator
+# Generator
 import random as ran
 import time
 
-for _ in range(10):
-    BAG_SIZE = 10000
-    ITEM_COUNT = 1000
+for _ in range(1):
+    BAG_SIZE = 1000
+    ITEM_COUNT = 100
     values = []
     weights = []    
 
@@ -29,5 +54,9 @@ for _ in range(10):
         values.append(rand * ran.randint(1, 5))
 
     start = time.time()
-    knapsack(BAG_SIZE, weights, values)
+    ks = Knapsack(BAG_SIZE, weights, values)
     print(time.time() - start)
+
+    # You can use any value from 1 to BAG_SIZE
+    print(ks.findMaxValue(BAG_SIZE))
+    print(ks.findElements(BAG_SIZE))
